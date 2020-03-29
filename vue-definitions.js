@@ -194,7 +194,8 @@ Vue.component('graph', {
       if (this.scale == 'Logarithmic Scale') {
         this.xrange = [1, Math.ceil(Math.log10(1.5*xmax))]
       } else {
-        this.xrange = [-0.49*Math.pow(10,Math.floor(Math.log10(xmax))), Math.round(1.05 * xmax)];
+        // this.xrange = [-0.49*Math.pow(10,Math.floor(Math.log10(xmax))), Math.round(1.05 * xmax)];
+        this.xrange = [0,0.0004]
       }
 
     },
@@ -205,7 +206,8 @@ Vue.component('graph', {
       if (this.scale == 'Logarithmic Scale') {
         this.yrange = [1, Math.ceil(Math.log10(1.5*ymax))]
       } else {
-        this.yrange = [-Math.pow(10,Math.floor(Math.log10(ymax))-2), Math.round(1.05 * ymax)];
+        // this.yrange = [-Math.pow(10,Math.floor(Math.log10(ymax))-2), Math.round(1.05 * ymax)];
+        this.yrange = [0,0.0004]
       }
 
     },
@@ -410,9 +412,23 @@ let app = new Vue({
       this.dates = dates;
 
       //this.day = this.dates.length;
-
+      
       let myData = [];
       for (let country of countries){
+        let divisor = 1;
+        if(country === 'New Zealand') {
+          divisor = 4822233
+        } else if(country === 'US'){
+          divisor = 331002647
+        } else if(country === 'Italy'){
+          divisor = 60461828
+        } else if(country === 'China'){
+          divisor = 1439323774
+        } else if(country === 'Korea, South'){
+          divisor = 51269183
+        } else if (country === 'Russia'){
+          divisor = 145934460
+        }
         let countryData = data.filter(e => e["Country/Region"] == country);
         let arr = [];
 
@@ -431,14 +447,14 @@ let app = new Vue({
 
           myData.push({
             country: country,
-            cases: arr.map(e => e >= this.minCasesInCountry ? e : NaN),
-            slope: slope.map((e,i) => arr[i] >= this.minCasesInCountry ? e : NaN),
+            cases: arr.map(e => e >= this.minCasesInCountry ? e/divisor * 100 : NaN),
+            slope: slope.map((e,i) => arr[i] >= this.minCasesInCountry ? e/divisor * 100 : NaN),
           });
 
         }
       }
 
-      this.covidData = myData.filter(e => this.myMax(...e.cases) >= this.minCasesInCountry);
+      this.covidData = myData
       this.countries = this.covidData.map(e => e.country).sort();
 
     },
@@ -593,7 +609,7 @@ let app = new Vue({
 
     selectedScale: 'Logarithmic Scale',
 
-    minCasesInCountry: 50,
+    minCasesInCountry: 1,
 
     dates: [],
 
